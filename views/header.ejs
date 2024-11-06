@@ -1,0 +1,15 @@
+<header>
+    <div class="container">
+        <h1><a href="/">FileWave</a></h1>
+        <nav>
+            <% if (!locals.user) { %>
+                <a class="link" href="/login">Login</a>
+                <a class="link sign-up" href="/sign-up">Sign Up</a>
+            <% } else { %>
+                <form action="/logout" method="POST">
+                    <button class="link" type="submit">Logout</button>
+                </form>
+            <% } %>
+        </nav>
+    </div>
+</header>
