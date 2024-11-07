@@ -1,3 +1,5 @@
+const upload = require('../middleware/multerConfig');
+
 function homepageGet(req, res) {
     const { user } = req;
     if(!user) {
@@ -6,6 +8,17 @@ function homepageGet(req, res) {
     res.render('home', { user: user });
 }
 
+const uploadPost = [
+    upload.single('file'),
+    (req, res) => {
+        const { file } = req;
+        file.filename += '.' + file.originalname.split('.')[file.originalname.split('.').length - 1];
+        console.log(file);
+        res.redirect('/');
+    }
+]
+
 module.exports = {
-    homepageGet
+    homepageGet,
+    uploadPost,
 }
