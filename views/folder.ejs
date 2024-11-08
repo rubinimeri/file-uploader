@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FileWave</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/header.css">
+    <style>
+        h2 {
+            padding: 1rem;
+            font-weight: 400;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        .buttons {
+            max-width: 1200px;
+            padding: 0 1rem;
+            display: flex;
+            gap: 1rem;
+            margin: 0 auto;
+            margin-bottom: 1rem;
+        }
+
+        .buttons button {
+            font-family: 'Noto Sans', 'Roboto', sans-serif;
+            padding: 8px 18px;
+            background-color: white;
+            border: 1px solid #1bf47d;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 16px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f9f9f9;
+        }
+        th:first-child, td:first-child {
+            width: 50%;
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 10%;
+        }
+        th:nth-child(3), td:nth-child(3) {
+            width: 20%;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            width: 10%;
+        }
+        tr:hover {
+            background-color: #eee;
+        }
+        .icon {
+            margin-right: 8px;
+            fill: black;
+        }
+        .owner-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #000;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .owner-text {
+            vertical-align: middle;
+        }
+        .menu-icon {
+            cursor: pointer;
+        }
+        
+        .invisible {
+            display: none;
+        }
+
+
+        .folder-methods {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .folder-methods button {
+            cursor: pointer;
+        }
+        .folder-methods form {
+            display: flex;
+        }
+        .rename-form input {
+            width: 100px;
+        }
+        tr a {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <%- include("header", { user: user }) %>
+    <% if (!locals.folder) { %>
+        <h2>Folder doesn't exist</h2>s
+    <% } else { %>
+        <h2 class="folder-name"><%=folder.name%></h2>
+        <div class="buttons">
+            <form class="" action="/new-folder/<%= folder.id %>" method="POST">
+                <input type="text" name="folderName" id="folderName" placeholder="Enter folder name">
+                <button class="new-folder" type="submit">
+                    <i class="fas fa-folder icon"></i>
+                    Add Folder
+                </button>
+            </form>
+            <button>
+                <i class="fas fa-file icon"></i>
+                New File
+            </button>
+        </div>
+        <table>
+            <thead>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Last modified</th>
+                <th>File size</th>
+                <th></th>
+            </thead>
+            <tbody>
+                <% if (folder.folders) { %>
+                    <% folder.folders.forEach(fd => { %>
+                        <tr>
+                            <td>
+                                <a href="/<%= fd.id %>">
+                                    <i class="fas fa-folder icon"></i>
+                                    <%= fd.name %>
+                                </a>
+                            </td>
+                            <td><%= user.username %></td>
+                            <td><%= fd.updatedAt.toLocaleDateString("en-GB") + '  ' + fd.updatedAt.toLocaleTimeString("en-GB", {
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                }); %></td>
+                            <td>—</td>
+                            <td>
+                                <div class="menu">
+                                    <div class="folder-methods">
+                                        <form action="/delete/<%= fd.id %>" method="POST">
+                                            <button class="delete-btn" type="submit">
+                                                <i class="fas fa-trash icon"></i>
+                                            </button>
+                                        </form>
+                                        <form class="rename-form" action="/rename/<%= fd.id %>" method="POST">
+                                            <input type="text" name="newName" id="newName" placeholder="Enter new name">
+                                            <button type="submit">
+                                                Rename
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+                <% if (folder.files) { %>
+                    <% folder.files.forEach(file => { %>
+                        <td><i class="fas fa-folder icon"></i><%= file.name %></td>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    <% } %>
+    <script>
+        const newFolder = document.querySelector('.new-folder');
+        const closeButton = document.querySelector('.close-btn');
+        newFolder.addEventListener('click', () => {
+            document.querySelector('.form-container').classList.toggle('invisible');
+        })
+    </script>
+</body>
+</html>
