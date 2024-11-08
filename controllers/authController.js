@@ -26,10 +26,16 @@ const signUpPost = [
             const checkUser = await prisma.user.findFirst({ where: { username } });
             if (!checkUser) {
                 const hashedPassword = await bcrypt.hash(password, 10);
-                await prisma.user.create({
+                const { id } = await prisma.user.create({
                     data: {
                         username,
                         password: hashedPassword,
+                    }
+                })
+                await prisma.folder.create({
+                    data: {
+                        name: 'My Files',
+                        userId: id
                     }
                 })
                 return next();

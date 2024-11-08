@@ -14,9 +14,23 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  username String @unique
+  id       String   @id @default(uuid())
+  username String   @unique
   password String
+  folders  Folder[]
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?
+  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  files     File[]
+  folders   Folder[] @relation("FolderToFolder")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {

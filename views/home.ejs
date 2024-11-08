@@ -31,7 +31,10 @@
     <% if (!locals.user) { %>
         <p class="info">Please <a href="/login">login</a> or <a href="/sign-up">sign up</a> to upload files!</p>
     <% } else { %>
-        <p class="info">Welcome to <b>FileWave!</b></p>
+        <p class="info">
+            Welcome to <b>FileWave!
+            </b> Go to <a href="/<%= rootFolder.id %>">root folder</a>
+        </p>
         <form action="/upload" method="POST" id="upload" enctype="multipart/form-data">
             <label for="file">Upload file</label>
             <input type="file" name="file" id="file" onchange="() => document.getElementById('upload').submit()">
