@@ -13,17 +13,6 @@ async function homepageGet(req, res) {
     res.render('home', { user: user, rootFolder: rootFolder });
 }
 
-const uploadPost = [
-    upload.single('file'),
-    (req, res) => {
-        const { file } = req;
-        file.filename += '.' + file.originalname.split('.')[file.originalname.split('.').length - 1];
-        console.log(file);
-        res.redirect('/');
-    }
-]
-
 module.exports = {
     homepageGet,
-    uploadPost,
 }

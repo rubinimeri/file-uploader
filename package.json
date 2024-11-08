@@ -13,6 +13,7 @@
   "dependencies": {
     "@quixo3/prisma-session-store": "^3.1.13",
     "bcrypt": "^5.1.1",
+    "cloudinary": "^2.5.1",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-session": "^1.18.1",

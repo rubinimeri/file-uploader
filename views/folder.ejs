@@ -10,10 +10,8 @@
     <link rel="stylesheet" href="/header.css">
     <style>
         h2 {
-            padding: 1rem;
+            padding: 1rem 14px;
             font-weight: 400;
-            max-width: 1200px;
-            margin: 0 auto;
         }
         body {
             font-family: Arial, sans-serif;
@@ -72,6 +70,11 @@
             margin-right: 8px;
             fill: black;
         }
+
+        td .fa-file {
+            fill: red;
+        }
+
         .owner-icon {
             width: 24px;
             height: 24px;
@@ -92,15 +95,15 @@
         }
 
 
-        .folder-methods {
+        .folder-methods, .file-methods {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .folder-methods button {
+        .folder-methods button,.file-methods button {
             cursor: pointer;
         }
-        .folder-methods form {
+        .folder-methods form,.file-methods form {
             display: flex;
         }
         .rename-form input {
@@ -109,6 +112,23 @@
         tr a {
             color: black;
         }
+        .folder-depth {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+        }
+        .folder-depth h2 {
+            margin: 0;
+            padding-right: 0;
+            padding-left: 14px;
+        }
+        .spacer {
+            font-size: 30px;
+            font-weight: 400;
+            padding-left: 14px;
+            color: #818080;
+        }
     </style>
 </head>
 <body>
@@ -116,7 +136,16 @@
     <% if (!locals.folder) { %>
         <h2>Folder doesn't exist</h2>s
     <% } else { %>
-        <h2 class="folder-name"><%=folder.name%></h2>
+        <div class="folder-depth">
+            <% folders.forEach(folder => { %>
+                <h2 class="folder-name">
+                    <a href="<%= folder.id %>">
+                        <%=folder.name%>
+                    </a>
+                </h2>
+                <span class="spacer">/</span>
+            <% }) %>
+        </div>
         <div class="buttons">
             <form class="" action="/new-folder/<%= folder.id %>" method="POST">
                 <input type="text" name="folderName" id="folderName" placeholder="Enter folder name">
@@ -125,10 +154,10 @@
                     Add Folder
                 </button>
             </form>
-            <button>
-                <i class="fas fa-file icon"></i>
-                New File
-            </button>
+            <form action="/upload/<%= folder.id %>" method="POST" id="upload" enctype="multipart/form-data">
+                <input type="file" name="file" id="file">
+                <button type="submit">New File</button>
+            </form>
         </div>
         <table>
             <thead>
@@ -176,7 +205,34 @@
                 <% } %>
                 <% if (folder.files) { %>
                     <% folder.files.forEach(file => { %>
-                        <td><i class="fas fa-folder icon"></i><%= file.name %></td>
+                        <tr>
+                            <td>
+                                <a href="/file/<%= file.id %>"><i class="fas fa-file icon"></i></i><%= file.name %></a>
+                            </td>
+                            <td><%= user.username %></td>
+                            <td><%= file.updatedAt.toLocaleDateString("en-GB") + '  ' + file.updatedAt.toLocaleTimeString("en-GB", {
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                }); %> </td>
+                            <td><%= (file.size / 1024 / 1024).toFixed(0) %>MB</td>
+                            <td>
+                                <div class="menu">
+                                    <div class="file-methods">
+                                        <form action="/file/delete/<%= file.id %>" method="POST">
+                                            <button class="delete-btn" type="submit">
+                                                <i class="fas fa-trash icon"></i>
+                                            </button>
+                                        </form>
+                                        <form class="rename-form" action="/file/rename/<%= file.id %>" method="POST">
+                                            <input type="text" name="newName" id="newName" placeholder="Enter new name">
+                                            <button type="submit">
+                                                Rename
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     <% }) %>
                 <% } %>
             </tbody>

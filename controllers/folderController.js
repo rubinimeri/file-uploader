@@ -9,14 +9,39 @@ async function folderGet(req, res) {
         return res.redirect('/login');
     }
 
+    // Ignore requests for favicon.ico
+    if (folderId === 'favicon.ico') {
+        return res.status(204).end(); // Respond with no content
+    }
+
     const rootFolder = await prisma.folder.findFirst({
         where: { id: folderId, userId: user.id },
-        include: { folders: true }
-    })
+        include: { folders: true, files: true }
+    });
 
-    console.log(rootFolder)
 
-    res.render('folder', { folder: rootFolder, user: user });
+    // While folder has a parent, then store that parent
+    // in an array with its id & name, repeat until parent
+    // is null
+
+    async function getFolders(currentFolders = [{
+        id: rootFolder.id,
+        name: rootFolder.name,
+        parentId: rootFolder.parentId
+    }]) {
+        if (!currentFolders[currentFolders.length-1].parentId) {
+            return currentFolders;
+        }
+        const parentFolder = await prisma.folder.findFirst({
+            where: { id: currentFolders[currentFolders.length - 1].parentId },
+        })
+        currentFolders.push({ id: parentFolder.id, name: parentFolder.name, parentId: parentFolder.parentId });
+        return await getFolders(currentFolders);
+    }
+
+    const folders = (await getFolders()).reverse();
+
+    res.render('folder', { folder: rootFolder, user: user, folders: folders });
 }
 
 async function newFolderPost(req, res) {

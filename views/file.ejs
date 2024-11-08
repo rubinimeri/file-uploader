@@ -1,0 +1,9 @@
+<div class="file">
+    <h2><%= file.name %></h2>
+    <p><b>Type: </b><%= file.type %></p>
+    <p><b>Size (bytes): </b><%= file.size %></p>
+    <p><b>Owner: </b><%= owner %></p>
+    <p><b><a href="<%= file.url %>">View</a></b><%= file.type %></p>
+    <button>Download</button>
+    <button onclick="(e) => e.target.closest('div').classList.toggle('invisible')">Close</button>
+</div>
