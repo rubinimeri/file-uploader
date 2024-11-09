@@ -16,6 +16,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(initSession);
 app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
-app.use("/", router);
+app.use(router);
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
