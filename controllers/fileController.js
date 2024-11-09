@@ -1,17 +1,19 @@
 const upload = require('../middleware/multerConfig');
 const cloudinary = require('../utils/cloudinaryConfig');
+const CustomError = require('../utils/customError');
+const asyncHandler = require('express-async-handler');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const uploadFilePost = [
     upload.single('file'),
-    async (req, res) => {
+    asyncHandler(async (req, res) => {
         const { folderId } = req.params;
         const { user } = req;
         await cloudinary.uploader.upload(req.file.path, async (err, result) => {
             if (err) {
-                return res.send("Error uploading");
+                throw new CustomError(err.message, err.statusCode);
             }
             await prisma.file.create({
                 data: {
@@ -24,98 +26,68 @@ const uploadFilePost = [
                     folderId: folderId,
                 }
             })
-            res.redirect(`/${folderId}`);
+            res.redirect(`/my-files/${folderId}`);
         })
-    }
+    })
 ]
 
-async function fileGet(req, res) {
+const fileGet = asyncHandler(async (req, res) => {
     const { user } = req;
     const { fileId } = req.params;
-
-    if(!user) {
-        res.redirect(`/login`);
-    }
-
-    if(!fileId) {
-        res.status(204).end();
-    }
 
     const file = await prisma.file.findFirst({
         where: { id: fileId }
     })
     res.render('file', { file: file, user: user });
-}
+})
 
-async function fileDownloadGet(req, res) {
+const fileDownloadGet = asyncHandler(async (req, res) => {
     const { fileId } = req.params;
-    if (!fileId) {
-        return res.status(400).send('File id is required');
+
+    const file = await prisma.file.findFirst({
+        where: { id: fileId }
+    })
+
+    if(!file) {
+        return console.error('Error fetching from database')
     }
 
-    try {
-        const file = await prisma.file.findFirst({
-            where: { id: fileId }
-        })
+    const response = await axios({
+        url: file.url,
+        method: 'GET',
+        responseType: 'stream'
+    })
 
-        if(!file) {
-            return console.error('Error fetching from database')
-        }
+    const { name } = file;
 
-        const response = await axios({
-            url: file.url,
-            method: 'GET',
-            responseType: 'stream'
-        })
+    res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
+    res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
 
-        const { name } = file;
+    response.data.pipe(res);
+})
 
-        res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
-        res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
-
-        response.data.pipe(res);
-
-    } catch (err) {
-        res.status(500).send('Error downloading file.');
-    }
-}
-
-async function fileDeleteGet(req, res) {
+const fileDeleteGet = asyncHandler(async (req, res) => {
     const { fileId } = req.params;
-    if (!fileId) {
-        return res.status(400).send('File id is required');
-    }
 
-    try {
-        // Delete from database
-        const file = await prisma.file.delete({ where: { id: fileId } });
+    // Delete from database
+    const file = await prisma.file.delete({ where: { id: fileId } });
 
-        // Delete from cloudinary
-        const { public_id } = await cloudinary.api.resource_by_asset_id(file.cloudinaryId);
-        await cloudinary.uploader.destroy(public_id);
-        res.redirect(`/${file.folderId}`);
-    } catch (err) {
-        res.status(500).send('Error deleting file.');
-    }
-}
+    // Delete from cloudinary
+    const { public_id } = await cloudinary.api.resource_by_asset_id(file.cloudinaryId);
+    await cloudinary.uploader.destroy(public_id);
+    res.redirect(`/my-files/${file.folderId}`);
+})
 
-async function fileRenamePost(req, res) {
+const fileRenamePost =  asyncHandler(async (req, res) => {
     const { fileId } = req.params;
     const { newName } = req.body;
-    if (!fileId || !newName) {
-        return res.status(400).send('File id and name are required');
-    }
 
-    try {
-        const file = await prisma.file.update({
-            where: { id: fileId },
-            data: { name: newName }
-        })
-        res.redirect(`/${file.folderId}`);
-    } catch (err) {
-        res.status(500).send('Error renaming file.');
-    }
-}
+    const file = await prisma.file.update({
+        where: { id: fileId },
+        data: { name: newName }
+    })
+    res.redirect(`/my-files/${file.folderId}`);
+})
 
 module.exports = {
     uploadFilePost,
