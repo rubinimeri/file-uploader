@@ -6,7 +6,7 @@ const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const uploadFilePost = [
+const fileUploadPost = [
     upload.single('file'),
     asyncHandler(async (req, res) => {
         const { folderId } = req.params;
@@ -90,7 +90,7 @@ const fileRenamePost =  asyncHandler(async (req, res) => {
 })
 
 module.exports = {
-    uploadFilePost,
+    fileUploadPost,
     fileGet,
     fileDownloadGet,
     fileDeleteGet,
