@@ -147,7 +147,7 @@
             <% }) %>
         </div>
         <div class="buttons">
-            <form class="" action="/new-folder/<%= folder.id %>" method="POST">
+            <form class="" action="/my-files/new-folder/<%= folder.id %>" method="POST">
                 <input type="text" name="folderName" id="folderName" placeholder="Enter folder name">
                 <button class="new-folder" type="submit">
                     <i class="fas fa-folder icon"></i>
@@ -172,7 +172,7 @@
                     <% folder.folders.forEach(fd => { %>
                         <tr>
                             <td>
-                                <a href="/<%= fd.id %>">
+                                <a href="/my-files/<%= fd.id %>">
                                     <i class="fas fa-folder icon"></i>
                                     <%= fd.name %>
                                 </a>
@@ -186,12 +186,12 @@
                             <td>
                                 <div class="menu">
                                     <div class="folder-methods">
-                                        <form action="/delete/<%= fd.id %>" method="POST">
+                                        <form action="/my-files/delete/<%= fd.id %>" method="POST">
                                             <button class="delete-btn" type="submit">
                                                 <i class="fas fa-trash icon"></i>
                                             </button>
                                         </form>
-                                        <form class="rename-form" action="/rename/<%= fd.id %>" method="POST">
+                                        <form class="rename-form" action="/my-files/rename/<%= fd.id %>" method="POST">
                                             <input type="text" name="newName" id="newName" placeholder="Enter new name">
                                             <button type="submit">
                                                 Rename
