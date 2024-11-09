@@ -80,8 +80,23 @@ async function fileDownloadGet(req, res) {
     }
 }
 
+async function fileDeleteGet(req, res) {
+    const { fileId } = req.params;
+    if (!fileId) {
+        return res.status(400).send('File id is required');
+    }
+
+    try {
+        const file = await prisma.file.delete({ where: { id: fileId } });
+        res.redirect(`/${file.folderId}`);
+    } catch (err) {
+        res.status(500).send('Error deleting file.');
+    }
+}
+
 module.exports = {
     uploadFilePost,
     fileGet,
-    fileDownloadGet
+    fileDownloadGet,
+    fileDeleteGet
 }
