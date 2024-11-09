@@ -15,6 +15,7 @@ router.post('/login', authController.loginPost);
 router.post('/logout', authController.logoutPost);
 
 router.post('/upload/:folderId', fileController.uploadFilePost);
+router.post('/file/rename/:fileId', fileController.fileRenamePost);
 router.get('/file/:fileId', fileController.fileGet);
 router.get('/file/delete/:fileId', fileController.fileDeleteGet)
 router.get('/download/:fileId', fileController.fileDownloadGet);

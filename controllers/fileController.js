@@ -99,9 +99,28 @@ async function fileDeleteGet(req, res) {
     }
 }
 
+async function fileRenamePost(req, res) {
+    const { fileId } = req.params;
+    const { newName } = req.body;
+    if (!fileId || !newName) {
+        return res.status(400).send('File id and name are required');
+    }
+
+    try {
+        const file = await prisma.file.update({
+            where: { id: fileId },
+            data: { name: newName }
+        })
+        res.redirect(`/${file.folderId}`);
+    } catch (err) {
+        res.status(500).send('Error renaming file.');
+    }
+}
+
 module.exports = {
     uploadFilePost,
     fileGet,
     fileDownloadGet,
-    fileDeleteGet
+    fileDeleteGet,
+    fileRenamePost
 }

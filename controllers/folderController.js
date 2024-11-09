@@ -101,7 +101,6 @@ async function folderDeletePost(req, res) {
                     },
                     include: {folders: true, files: true}
                 })
-                console.log("Inside recursion: ", currentFolder);
 
                 // If currentFolder has files then delete them
                 if (currentFolder.files.length !== 0) {
