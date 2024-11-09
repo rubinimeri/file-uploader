@@ -3,62 +3,62 @@ const { validateLogin, validateSignUp } = require('../middleware/validateFields'
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const passport = require('../strategies/localStrategy');
+const asyncHandler = require("express-async-handler");
+const CustomError = require('../utils/customError')
 const prisma = new PrismaClient();
 
-function signUpGet(req, res) {
+function signUpGet(req, res, next) {
     const { user } = req;
     if (!user) {
         return res.render('auth/signUp')
     }
-    res.send('Error: you are already logged in');
+    const error = new CustomError('FORBIDDEN', 403);
+    next(error);
 }
 
 const signUpPost = [
     validateSignUp,
-    async (req, res, next) => {
-        try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.render('auth/signUp', { errors: errors });
-            }
-
-            const { username, password } = req.body;
-            const checkUser = await prisma.user.findFirst({ where: { username } });
-            if (!checkUser) {
-                const hashedPassword = await bcrypt.hash(password, 10);
-                const { id } = await prisma.user.create({
-                    data: {
-                        username,
-                        password: hashedPassword,
-                    }
-                })
-                await prisma.folder.create({
-                    data: {
-                        name: 'My Files',
-                        userId: id
-                    }
-                })
-                return next();
-            }
-            res.status(409).render("auth/signUp", {user: null, errors: ['Username already in use']});
-        } catch (err) {
-            console.error(err);
+    asyncHandler(async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.render('auth/signUp', { errors: errors });
         }
-    },
+
+        const { username, password } = req.body;
+        const checkUser = await prisma.user.findFirst({ where: { username } });
+        if (!checkUser) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const { id } = await prisma.user.create({
+                data: {
+                    username,
+                    password: hashedPassword,
+                }
+            })
+            await prisma.folder.create({
+                data: {
+                    name: 'My Files',
+                    userId: id
+                }
+            })
+            return next();
+        }
+        res.status(409).render("auth/signUp", {user: null, errors: ['Username already in use']});
+    }),
     passport.authenticate('local', { successRedirect: '/' })
 ];
 
-function loginGet(req, res) {
+function loginGet(req, res, next) {
     const { user } = req;
     if (!user) {
         return res.render('auth/login')
     }
-    res.send('Error: you are already logged in');
+    const error = new CustomError('FORBIDDEN', 403);
+    next(error);
 }
 
 const loginPost = [
     validateLogin,
-    async (req, res, next) => {
+    (req, res, next) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
             return res.render('auth/login', { errors: errors });
