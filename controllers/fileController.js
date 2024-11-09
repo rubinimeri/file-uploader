@@ -47,7 +47,7 @@ async function fileGet(req, res) {
     res.render('file', { file: file, user: user });
 }
 
-async function fileDownloadPost(req, res) {
+async function fileDownloadGet(req, res) {
     const { fileId } = req.params;
     if (!fileId) {
         return res.status(400).send('File id is required');
@@ -83,5 +83,5 @@ async function fileDownloadPost(req, res) {
 module.exports = {
     uploadFilePost,
     fileGet,
-    fileDownloadPost
+    fileDownloadGet
 }
