@@ -48,10 +48,6 @@ const fileDownloadGet = asyncHandler(async (req, res) => {
         where: { id: fileId }
     })
 
-    if(!file) {
-        return console.error('Error fetching from database')
-    }
-
     const response = await axios({
         url: file.url,
         method: 'GET',

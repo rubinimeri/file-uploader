@@ -1,6 +1,4 @@
 const { PrismaClient } = require('@prisma/client');
-const cloudinary = require('../utils/cloudinaryConfig');
-const CustomError = require('../utils/customError');
 const asyncHandler = require("express-async-handler");
 const deleteFolders = require('../utils/deleteFolders');
 const getFolderPath = require('../utils/getFolderPath');
