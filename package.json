@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@quixo3/prisma-session-store": "^3.1.13",
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "ejs": "^3.1.10",

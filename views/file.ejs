@@ -1,9 +1,27 @@
-<div class="file">
-    <h2><%= file.name %></h2>
-    <p><b>Type: </b><%= file.type %></p>
-    <p><b>Size (bytes): </b><%= file.size %></p>
-    <p><b>Owner: </b><%= owner %></p>
-    <p><b><a href="<%= file.url %>">View</a></b><%= file.type %></p>
-    <button>Download</button>
-    <button onclick="(e) => e.target.closest('div').classList.toggle('invisible')">Close</button>
-</div>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>File</title>
+    <link rel="stylesheet" href="/header.css">
+</head>
+<body>
+    <%- include("header", { user: user }) %>
+    <div class="file">
+        <h2><%= file.name %></h2>
+        <div class="file-info">
+            <p><b>Type: </b><%= file.type %></p>
+            <p><b>Size (bytes): </b><%= file.size %></p>
+            <p><b>Owner: </b><%= user.username %></p>
+            <p><b><a href="<%= file.url %>">View</a></b></p>
+        </div>
+        <a class="url" href="<%= file.url %>"></a>
+        <form action="/download/<%= file.id %>" method="GET" >
+            <button class="download">Download</button>
+        </form>
+    </div>
+</body>
+</html>
