@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const cloudinary = require('../utils/cloudinaryConfig');
 const prisma = new PrismaClient();
 
 async function folderGet(req, res) {
@@ -76,12 +77,63 @@ async function folderRenamePost(req, res) {
 
 async function folderDeletePost(req, res) {
     const { folderId } = req.params;
-    const folder = await prisma.folder.delete({
-        where: {
-            id: folderId,
-        },
-    })
-    res.redirect(`/${folder.parentId}`);
+    if (!folderId) {
+        return res.status(400).send('Folder id is required');
+    }
+    try {
+        const folder = await prisma.folder.findFirst({
+            where: {
+                id: folderId,
+            },
+            include: {folders: true, files: true}
+        })
+
+        // Recursively delete folders & files
+        async function deleteFolders(currentFolderId = folder.id) {
+            try {
+                // If there is no folder id, return
+                if (!currentFolderId)
+                    return;
+
+                const currentFolder = await prisma.folder.findFirst({
+                    where: {
+                        id: currentFolderId,
+                    },
+                    include: {folders: true, files: true}
+                })
+                console.log("Inside recursion: ", currentFolder);
+
+                // If currentFolder has files then delete them
+                if (currentFolder.files.length !== 0) {
+                    currentFolder.files.forEach(async (file) => {
+                        // Delete from database
+                        await prisma.file.delete({ where: { id: file.id } });
+
+                        // Delete from cloudinary
+                        const { public_id } = await cloudinary.api.resource_by_asset_id(file.cloudinaryId);
+                        await cloudinary.uploader.destroy(public_id);
+                    })
+                }
+
+                // Delete currentFolder
+                await prisma.folder.delete({where: {id: currentFolder.id}});
+
+                // If current folder has folders, recursively delete them
+                if (currentFolder.folders.length !== 0) {
+                    currentFolder.folders.forEach(async (folder) => {
+                        await deleteFolders(folder.id)
+                    })
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        deleteFolders();
+        res.redirect(`/${folder.parentId}`);
+    } catch (err) {
+        res.status(500).send('Failed to delete folder')
+    }
 }
 
 module.exports = {

@@ -87,7 +87,12 @@ async function fileDeleteGet(req, res) {
     }
 
     try {
+        // Delete from database
         const file = await prisma.file.delete({ where: { id: fileId } });
+
+        // Delete from cloudinary
+        const { public_id } = await cloudinary.api.resource_by_asset_id(file.cloudinaryId);
+        await cloudinary.uploader.destroy(public_id);
         res.redirect(`/${file.folderId}`);
     } catch (err) {
         res.status(500).send('Error deleting file.');
